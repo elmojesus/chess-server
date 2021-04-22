@@ -1,5 +1,9 @@
 const axios = require('axios')
-const io = require('socket.io')(8080);
+const io = require('socket.io')(8080, {
+  cors: {
+    origin: '*',
+  }
+});
 
 class Game{
   constructor(link){
@@ -45,8 +49,8 @@ const moveGame = (source, destination, item) => {
 }
 
 const addGame = link => {
-  if(link.includes('https://lichess.org/') && join.filter(c => c.link === value).length === 0){
-      const card = new Game(value)
+  if(link.includes('https://lichess.org/') && join.filter(c => c.link === link).length === 0){
+      const card = new Game(link)
       return card
   }
 }
@@ -60,8 +64,8 @@ setInterval(() => {
           if(obj.status === 'started'){
               c.updateJson(obj)
               let {a, b} = moveGame(join, spec, c)
-              setJoin(a)
-              setSpec(b)
+              join = a
+              spec = b
           }
       })
   })
@@ -70,11 +74,12 @@ setInterval(() => {
           const obj = JSON.parse(data)
           if(obj.status !== 'started'){
               let {a, b} = moveGame(spec, end, c)
-              setSpec(a)
-              setEnd(b)
+              spec = a
+              end = b
           }
       })
   })
+  updateGames()
 }, 5000)
 
 
@@ -85,6 +90,7 @@ const updateGames = () => {
 
 io.on('connection', (socket) => {
   socket.on('new', link => {
+    console.log('connection')
     join.push(addGame(link, join))
   })
 })

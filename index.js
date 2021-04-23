@@ -84,13 +84,13 @@ setInterval(() => {
 
 
 const updateGames = () => {
-  const data = JSON.stringify(join, spec, end)
+  const data = JSON.stringify({ j: join, s : spec, e: end})
+  console.log(data)
   io.sockets.emit('UpdateGames', data)
 }
 
 io.on('connection', (socket) => {
   socket.on('new', link => {
-    console.log('connection')
     join.push(addGame(link, join))
   })
 })

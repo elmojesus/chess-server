@@ -1,4 +1,5 @@
 const axios = require('axios')
+
 const io = require('socket.io')(8080, {
   cors: {
     origin: '*',
@@ -17,8 +18,9 @@ class Game{
   updateJson(json){
       this.id = json.id
       this.date = json.date
-      this.black = json.players.black.user.id
-      this.white = json.players.white.user.id
+      console.log(json)
+      this.black = json.players.black.user ? json.players.black.user.id : 'Anonymous'
+      this.white = json.players.white.user ? json.players.white.user.id : 'Anonymous'
   }
 }
 
@@ -29,12 +31,11 @@ let end = []
 
 const fetchGame = async (gameId) => {
   try {
-      //console.log('here')
       const { data } = await axios.get(`https://lichess.org/game/export/${gameId}`, { headers: { 'Accept': 'application/json' } })
-      //console.log(data)
       return JSON.stringify(data)
   } catch (err) {
-      console.error(err)
+      //console.error(err)
+      return null
   }
 }
 
@@ -57,41 +58,47 @@ const addGame = link => {
 
 setInterval(() => {
   join.map( c => {
-      //console.log(c.link)
-      //console.log(c.id)
       fetchGame(c.id).then((data) => {
-          const obj = JSON.parse(data)
-          if(obj.status === 'started'){
-              c.updateJson(obj)
-              let {a, b} = moveGame(join, spec, c)
-              join = a
-              spec = b
+          if (data !== null){
+            const obj = JSON.parse(data)
+            c.updateJson(obj)
+
+            if(obj.status === 'started'){
+
+                spec.unshift(c)
+                join = join.filter(game => game !== c)
+            }
           }
       })
   })
+
   spec.map( c => {
       fetchGame(c.id).then((data) => {
-          const obj = JSON.parse(data)
-          if(obj.status !== 'started'){
-              let {a, b} = moveGame(spec, end, c)
-              spec = a
-              end = b
-          }
+        if(data !== null){
+            const obj = JSON.parse(data)
+            c.updateJson(obj)
+
+            if(obj.status !== 'started'){
+                end.unshift(c)
+                spec = spec.filter(game => game !== c)
+            }
+        }
       })
   })
+
   updateGames()
 }, 5000)
 
 
 const updateGames = () => {
   const data = JSON.stringify({ j: join, s : spec, e: end})
-  console.log(data)
   io.sockets.emit('UpdateGames', data)
 }
 
 io.on('connection', (socket) => {
   socket.on('new', link => {
     join.push(addGame(link, join))
+    updateGames()
   })
 })
 

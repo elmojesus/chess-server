@@ -18,7 +18,6 @@ class Game{
   updateJson(json){
       this.id = json.id
       this.date = json.date
-      console.log(json)
       this.black = json.players.black.user ? json.players.black.user.id : 'Anonymous'
       this.white = json.players.white.user ? json.players.white.user.id : 'Anonymous'
   }
@@ -37,16 +36,6 @@ const fetchGame = async (gameId) => {
       //console.error(err)
       return null
   }
-}
-
-const moveGame = (source, destination, item) => {
-  let sourceClone = [...source]
-  let destinationClone = [...destination]
-
-  sourceClone = sourceClone.filter(i => i.id !== item.id)
-  destinationClone.unshift(item) 
-
-  return {a: sourceClone, b: destinationClone}
 }
 
 const addGame = link => {
@@ -96,6 +85,9 @@ const updateGames = () => {
 }
 
 io.on('connection', (socket) => {
+  const data = JSON.stringify({ j: join, s : spec, e: end})
+  io.to(socket.id).emit('UpdateGames', data)
+
   socket.on('new', link => {
     join.push(addGame(link, join))
     updateGames()

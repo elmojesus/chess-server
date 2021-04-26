@@ -54,11 +54,13 @@ setInterval(() => {
 
             if(obj.status === 'started'){
               spec.unshift(c)
-              join = join.filter(game => game !== c)
             } else if (obj.status === 'aborted') {
               end.unshift(c)
-              join = join.filter(game => game !== c)
+            } else {
+              end.unshift(c)
             }
+            
+            join = spec.filter(game => game !== c)
           }
       })
   })

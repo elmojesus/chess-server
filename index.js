@@ -53,9 +53,11 @@ setInterval(() => {
             c.updateJson(obj)
 
             if(obj.status === 'started'){
-
-                spec.unshift(c)
-                join = join.filter(game => game !== c)
+              spec.unshift(c)
+              join = join.filter(game => game !== c)
+            } else if (obj.status === 'aborted') {
+              end.unshift(c)
+              join = join.filter(game => game !== c)
             }
           }
       })

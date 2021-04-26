@@ -33,7 +33,7 @@ const fetchGame = async (gameId) => {
       const { data } = await axios.get(`https://lichess.org/game/export/${gameId}`, { headers: { 'Accept': 'application/json' } })
       return JSON.stringify(data)
   } catch (err) {
-      //console.error(err)
+      console.error(err)
       return null
   }
 }
@@ -81,7 +81,7 @@ setInterval(() => {
 
 const updateGames = () => {
   const data = JSON.stringify({ j: join, s : spec, e: end})
-  io.sockets.emit('UpdateGames', data)
+  io.emit('UpdateGames', data)
 }
 
 io.on('connection', (socket) => {

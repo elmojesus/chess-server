@@ -60,7 +60,7 @@ setInterval(() => {
               end.unshift(c)
             }
             
-            join = spec.filter(game => game !== c)
+            join = join.filter(game => game !== c)
           }
       })
   })
